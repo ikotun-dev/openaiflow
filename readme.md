@@ -1,3 +1,3 @@
 ## OpenAIFlow
 
-> openAI lifecycle management
+> openAI lifecycle management for texts
