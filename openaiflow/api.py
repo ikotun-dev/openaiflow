@@ -1,6 +1,7 @@
 import os
 
 import dotenv
+import file_parser
 
 # import openai
 from openai import OpenAI
@@ -67,15 +68,19 @@ class OpenaiWrapper:
             raise ValueError(f"Error creating assistant: {e}")
 
     def create_assistant_via_file(self, name, model, file):
-        pass
+        try:
+            file_parser.extract_text_from_file(file)
+        except ValueError:
+            raise ValueError("Error extracting text from file")
 
 
 client = OpenaiWrapper(os.getenv("KEY"))
 # client = OpenaiWrapper()
 client.validate_api_key()
 
-client.create_assistant(
+client.create_assistant_via_file(
     name="test",
-    instructions="testing assistant lol, just for random stuff ",
-    # model="gpt-3.5-turbo",
+    # instructions="testing assistant lol, just for random stuff ",
+    model="gpt-3.5-turbo",
+    file="reto.pdf",
 )

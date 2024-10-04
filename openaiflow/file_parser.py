@@ -15,6 +15,9 @@ def extract_text_from_file(file) -> str:
     if not file:
         raise ValueError("File is required")
 
-    with open(file, "r") as f:
-        data = f.read()
-        return data
+    try:
+        with open(file, "r") as f:
+            data = f.read()
+            return data
+    except Exception as e:
+        raise ValueError(f"Error extracting text from file: {e}")
