@@ -1,7 +1,9 @@
 import os
 
 import dotenv
-import openai
+
+# import openai
+from openai import OpenAI
 
 # import time
 dotenv.load_dotenv()
@@ -22,8 +24,7 @@ MESSAGES_URL = (
 class OpenaiWrapper:
     def __init__(self, api_key):
         self._api_key = api_key  # set to protected
-        openai.api_key = self._api_key
-        self.client = None
+        self.client = OpenAI(api_key=self._api_key)
 
         self.headers = {
             "Authorization": f"Bearer {self._api_key}",
@@ -36,8 +37,8 @@ class OpenaiWrapper:
         tests validity of the api_key by creating a message
         """
         try:
-            client = openai.OpenAI()
-            _ = client.chat.completions.create(
+            # self.client = openai.OpenAI()
+            _ = self.client.chat.completions.create(
                 model="gpt-3.5-turbo",
                 messages=[
                     {"role": "system", "content": "You are a helpful assistant."},
@@ -46,15 +47,35 @@ class OpenaiWrapper:
             )
 
             print(_.choices[0])
-            print("API key is valid")
+            return True
         except Exception as e:
-            print(f"Error : {e}")
-            print("API key is invalid")
+            raise ValueError(f"API key is invalid : {e}")
 
-    def create_assistant(self):
+    def create_assistant(self, name, instructions, model):
+        try:
+            if not name or not instructions or not model:
+                raise ValueError("Name, instructions and model are required")
+
+            assistant = self.client.beta.assistants.create(
+                name=name,
+                instructions=instructions,
+                model=model,
+                tools=[{"type": "code_interpreter"}],
+            )
+            return assistant
+        except Exception as e:
+            raise ValueError(f"Error creating assistant: {e}")
+
+    def create_assistant_via_file(self, name, model, file):
         pass
 
 
-# client = OpenaiWrapper(os.getenv("KEY"))
-client = OpenaiWrapper("ah")
+client = OpenaiWrapper(os.getenv("KEY"))
+# client = OpenaiWrapper()
 client.validate_api_key()
+
+client.create_assistant(
+    name="test",
+    instructions="testing assistant lol, just for random stuff ",
+    # model="gpt-3.5-turbo",
+)
