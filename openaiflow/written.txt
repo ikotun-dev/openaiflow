@@ -1,0 +1,26 @@
+Timeout Error:
+
+If the API request takes too long to complete.
+Example: requests.exceptions.Timeout: Request timed out
+
+
+Permission Error:
+
+If your account doesn't have permission to use certain features or models.
+Example: openai.error.PermissionError: You don't have permission to use this model
+
+
+Server Error:
+
+If there's an issue on OpenAI's end.
+Example: openai.error.APIError: Internal server error
+
+
+Insufficient Quota Error:
+
+If you've exceeded your usage quota or have billing issues.
+Example: openai.error.InsufficientQuotaError: You exceeded your current quota, please check your plan and billing details
+
+
+
+To handle these errors effectively, you could modify your create_assistant method to catch specific exceptions:
