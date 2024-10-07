@@ -1,4 +1,5 @@
 import os
+import requests
 
 import dotenv
 import file_parser
@@ -13,13 +14,6 @@ dotenv.load_dotenv()
 # TODO: create assistant
 # TODO: create a thread
 # TODO: store messages ( in memory ) for a thread
-
-
-"""
-MESSAGES_URL = (
-    f"https://api.openai.com/v1/threads/{thread_id}/messages?limit=1&order=desc"
-)
-"""
 
 
 class OpenaiWrapper:
@@ -47,7 +41,7 @@ class OpenaiWrapper:
                 ],
             )
 
-            print(_.choices[0])
+            # print(_.choices[0])
             return True
         except Exception as e:
             raise ValueError(f"API key is invalid : {e}")
@@ -69,18 +63,35 @@ class OpenaiWrapper:
 
     def create_assistant_via_file(self, name, model, file):
         try:
-            file_parser.extract_text_from_file(file)
+            instructions = file_parser.extract_text_from_file(file)
+            return self.create_assistant(name, instructions, model)
         except ValueError:
             raise ValueError("Error extracting text from file")
 
+    def create_thread(self, assistant_id):
+        try:
+            thread = self.client.beta.threads.create()
+            return thread
+        except Exception as e:
+            raise ValueError(f"Error creating thread: {e}")
+
+    def get_latest_messages(self, thread_id):
+        try:
+            MESSAGES_URL = f"https://api.openai.com/v1/threads/{thread_id}/messages?limit=10&order=desc"
+
+            previous_messages = requests.get(MESSAGES_URL, headers=self.headers)
+            if previous_messages.status_code != 200:
+                raise ValueError("Error fetching messages")
+            return previous_messages.json()
+
+        except Exception as e:
+            raise ValueError(f"Error fetching messages: {e}")
+            pass
+
 
 client = OpenaiWrapper(os.getenv("KEY"))
-# client = OpenaiWrapper()
 client.validate_api_key()
 
-client.create_assistant_via_file(
-    name="test",
-    # instructions="testing assistant lol, just for random stuff ",
-    model="gpt-3.5-turbo",
-    file="reto.pdf",
-)
+
+#
+print(client.get_latest_messages("thread_DMrqTY8eLuHxh97T60jgy3GR"))
