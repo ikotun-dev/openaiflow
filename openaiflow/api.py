@@ -112,14 +112,18 @@ class OpenaiWrapper:
                 raise ValueError(f"Missing required key: {key}")
 
         # validate assistant
-        self.validate_assistant(kwargs["assistant_id"])
+        _assistant = self.validate_assistant(kwargs["assistant_id"])
 
         # can handle this anyhow you want :- in memory, db, etc.
+        if kwargs["thread_id"] is not None:
+            thread = self.validate_thread(kwargs["thread_id"])
+            # get latest messages
+            messages = self.get_latest_messages(kwargs["thread_id"])
+            print(messages)
+
         if kwargs["thread_id"] is None:
             thread = self.create_thread(kwargs["assistant_id"])
             kwargs["thread_id"] = thread.id
-
-        pass
 
 
 client = OpenaiWrapper(os.getenv("KEY"))
