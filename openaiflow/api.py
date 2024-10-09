@@ -61,6 +61,13 @@ class OpenaiWrapper:
         except Exception as e:
             raise ValueError(f"Error creating assistant: {e}")
 
+    def validate_assistant(self, assistant_id):
+        try:
+            assistant = self.client.beta.assistants.retrieve(assistant_id)
+            return assistant
+        except Exception as e:
+            raise ValueError(f"Error validating assistant: {e}")
+
     def create_assistant_via_file(self, name, model, file):
         try:
             instructions = file_parser.extract_text_from_file(file)
@@ -75,6 +82,13 @@ class OpenaiWrapper:
         except Exception as e:
             raise ValueError(f"Error creating thread: {e}")
 
+    def validate_thread(self, thread_id):
+        try:
+            thread = self.client.beta.threads.retrieve(thread_id)
+            return thread
+        except Exception as e:
+            raise ValueError(f"Error validating thread: {e}")
+
     def get_latest_messages(self, thread_id):
         try:
             MESSAGES_URL = f"https://api.openai.com/v1/threads/{thread_id}/messages?limit=10&order=desc"
@@ -88,10 +102,30 @@ class OpenaiWrapper:
             raise ValueError(f"Error fetching messages: {e}")
             pass
 
+    def chat(self, **kwargs):
+        # user to pass thread_id=None -> if they need to create new thread
+
+        required_keys = ["assistant_id", "thread_id"]
+
+        for key in required_keys:
+            if key not in kwargs:
+                raise ValueError(f"Missing required key: {key}")
+
+        # validate assistant
+        self.validate_assistant(kwargs["assistant_id"])
+
+        # can handle this anyhow you want :- in memory, db, etc.
+        if kwargs["thread_id"] is None:
+            thread = self.create_thread(kwargs["assistant_id"])
+            kwargs["thread_id"] = thread.id
+
+        pass
+
 
 client = OpenaiWrapper(os.getenv("KEY"))
 client.validate_api_key()
 
 
 #
-print(client.get_latest_messages("thread_DMrqTY8eLuHxh97T60jgy3GR"))
+# print(client.get_latest_messages("thread_DMrqTY8eLuHxh97T60jgy3GR"))
+client.chat(thread_id=None, assistant_id="ass_234")
