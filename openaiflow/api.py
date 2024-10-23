@@ -1,10 +1,7 @@
 import os
 import requests
-
 import dotenv
 import file_parser
-
-# import openai
 from openai import OpenAI
 
 # import time
@@ -124,6 +121,19 @@ class OpenaiWrapper:
         if kwargs["thread_id"] is None:
             thread = self.create_thread(kwargs["assistant_id"])
             kwargs["thread_id"] = thread.id
+
+        # if everything has been validated, we can now chat
+        print("Chatting....")
+        user_message = input("You: ")
+
+    def chat_console():
+        """
+        This function enables chatting  with the assistant via the console
+        """
+        pass
+
+    def chat_websocket(self, websocket, **kwargs):
+        pass
 
 
 client = OpenaiWrapper(os.getenv("KEY"))
