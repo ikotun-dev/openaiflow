@@ -8,8 +8,6 @@ from openai import OpenAI
 dotenv.load_dotenv()
 
 # TODO: Add a method to check the validity of the api
-# TODO: create assistant
-# TODO: create a thread
 # TODO: store messages ( in memory ) for a thread
 
 
