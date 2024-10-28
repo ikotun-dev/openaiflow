@@ -1,7 +1,7 @@
 import os
 import requests
 import dotenv
-import file_parser
+from . import file_parser
 from openai import OpenAI
 
 # import time
@@ -134,10 +134,10 @@ class OpenaiWrapper:
         pass
 
 
-client = OpenaiWrapper(os.getenv("KEY"))
-client.validate_api_key()
-
-
+# client = OpenaiWrapper(os.getenv("KEY"))
+# client.validate_api_key()
 #
-# print(client.get_latest_messages("thread_DMrqTY8eLuHxh97T60jgy3GR"))
-client.chat(thread_id=None, assistant_id="ass_234")
+#
+# #
+# # print(client.get_latest_messages("thread_DMrqTY8eLuHxh97T60jgy3GR"))
+# client.chat(thread_id=None, assistant_id="ass_234")
