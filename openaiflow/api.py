@@ -1,7 +1,8 @@
 import os
+import time
 import requests
 import dotenv
-from . import file_parser
+import file_parser
 from openai import OpenAI
 
 # import time
@@ -84,6 +85,24 @@ class OpenaiWrapper:
         except Exception as e:
             raise ValueError(f"Error validating thread: {e}")
 
+    def create_run(self, thread_id, assistant_id):
+        try:
+            run = self.client.beta.threads.runs.create(
+                thread_id=thread_id, assistant_id=assistant_id
+            )
+            return run
+        except Exception as e:
+            raise ValueError(f"Error creating run: {e}")
+
+    def retrieve_run(self, thread_id, run_id):
+        try:
+            run = self.client.beta.threads.runs.retrieve(
+                thread_id=thread_id, run_id=run_id
+            )
+            return run
+        except Exception as e:
+            raise ValueError(f"Error retrieving run: {e}")
+
     def get_latest_messages(self, thread_id):
         try:
             MESSAGES_URL = f"https://api.openai.com/v1/threads/{thread_id}/messages?limit=10&order=desc"
@@ -97,8 +116,14 @@ class OpenaiWrapper:
             raise ValueError(f"Error fetching messages: {e}")
             pass
 
-    def chat(self, **kwargs):
-        # user to pass thread_id=None -> if they need to create new thread
+    def chat(self, input_type, **kwargs):
+        """
+        This is the main method to chat with the assistant,
+        various input formats would be supported, one time messaging, and a back and forth mechanism.
+
+        :param input_type: str -> type of input to be used (console, interactive). Default is console
+        """
+        # NOTE: user to pass thread_id=None -> if they need to create new thread
 
         required_keys = ["assistant_id", "thread_id"]
 
@@ -109,7 +134,7 @@ class OpenaiWrapper:
         # validate assistant
         _assistant = self.validate_assistant(kwargs["assistant_id"])
 
-        # can handle this anyhow you want :- in memory, db, etc.
+        # NOTE: can handle this anyhow you want :- in memory, db, etc.
         if kwargs["thread_id"] is not None:
             thread = self.validate_thread(kwargs["thread_id"])
             # get latest messages
@@ -120,23 +145,95 @@ class OpenaiWrapper:
             thread = self.create_thread(kwargs["assistant_id"])
             kwargs["thread_id"] = thread.id
 
-        # if everything has been validated, we can now chat
-        print("Chatting....")
-        user_message = input("You: ")
+        if input_type == "console":
+            self.console_chat(kwargs["thread_id"], kwargs["assistant_id"], messages)
 
-    def chat_console():
+    def console_chat(self, thread_id, assistant_id, messages):
         """
-        This function enables chatting  with the assistant via the console
+        This method is used to chat with the assistant via the console
         """
+        new_run = self.create_run(thread_id, assistant_id)
+
+        while True:
+            user_message = input("You: ")
+            if user_message == "exit":
+                break
+            assistant_response, _, _ = self.handle_message(
+                user_message, thread_id, assistant_id, new_run.id
+            )
+            print(f"Assistant: {assistant_response}")
+            del assistant_response
         pass
 
-    def chat_websocket(self, websocket, **kwargs):
-        pass
+    def handle_message(self, message, thread_id, assistant_id, run_id=None):
+        """
+        This method is used to handle messages to and from the assistant
+
+        :param message: str -> The message to be sent to the assistant_id
+        :param thread_id: str -> The thread_id to be used
+        :param assistant_id: str -> The assistant_id to be used
+        """
+
+        # NOTE: can handle this anyhow you want :- in memory, db, etc
+
+        if run_id is None:
+            return ValueError("Run ID is required")
+            # run = self.create_run(thread_id, assistant_id)
+            # run_id = run.id
+        else:
+            run = self.retrieve_run(thread_id, run_id)
+
+        while run.status == "in_progress" or run.status == "queued":
+            print("Waiting for response...")
+            # TODO: make users set their own time
+            time.sleep(0.5)
+            run = self.retrieve_run(thread_id, run_id)
+
+        # the response just provided by the bot
+        previous_message = self.get_latest_messages(thread_id)
+        parsed_response = self.parse_assistant_response(previous_message)
+
+        return parsed_response
+
+    def parse_assistant_response(self, response):
+        """
+        Parse the assistant response to extract relevant information.
+
+        :param response: dict -> The response from the assistant.
+        :return: Tuple[str, str, str] -> Assistant's message, thread_id, run_id
+        """
+
+        if "data" in response and response["data"]:
+            latest_message = response["data"][
+                -1
+            ]  # Assuming the latest message is the last item in the list
+
+            assistant_message = (
+                latest_message["content"][0]["text"]["value"]
+                if latest_message["content"]
+                else "No content available"
+            )
+
+            thread_id = latest_message["thread_id"]
+            run_id = latest_message["run_id"]
+
+            return assistant_message, thread_id, run_id
+        else:
+            return "No messages found", None, None
 
 
-# client = OpenaiWrapper(os.getenv("KEY"))
-# client.validate_api_key()
-#
+client = OpenaiWrapper(os.getenv("KEY"))
+print(client.validate_api_key())
+
+
+assistant = client.create_assistant("Testerr", "Just a random", "gpt-3.5-turbo")
+print(assistant.id)
+
+thread = client.create_thread(assistant.id)
+
+client.chat(input_type="console", thread_id=thread.id, assistant_id=assistant.id)
+
+
 #
 # #
 # # print(client.get_latest_messages("thread_DMrqTY8eLuHxh97T60jgy3GR"))

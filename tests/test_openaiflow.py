@@ -36,6 +36,11 @@ class TestOpenAIFlow(unittest.TestCase):
         assistant = self.wrapper.client.create_assistant(name, instructions, model)
         self.assertIsNotNone(assistant)
 
+    def test_creating_thread_with_invalid_data(self):
+        with self.assertRaises(ValueError):
+            invalid_client = api.OpenaiWrapper("")
+            invalid_client.create_thread("")
+
     def test_create_assistant_missing_total_data(self):
         with self.assertRaises(ValueError):
             invalid_client = api.OpenaiWrapper("")
