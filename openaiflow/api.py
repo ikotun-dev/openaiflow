@@ -105,7 +105,7 @@ class OpenaiWrapper:
 
     def get_latest_messages(self, thread_id):
         try:
-            MESSAGES_URL = f"https://api.openai.com/v1/threads/{thread_id}/messages?limit=10&order=desc"
+            MESSAGES_URL = f"https://api.openai.com/v1/threads/{thread_id}/messages?limit=1&order=desc"
 
             previous_messages = requests.get(MESSAGES_URL, headers=self.headers)
             if previous_messages.status_code != 200:
@@ -152,18 +152,19 @@ class OpenaiWrapper:
         """
         This method is used to chat with the assistant via the console
         """
-        new_run = self.create_run(thread_id, assistant_id)
+        try:
+            new_run = self.create_run(thread_id, assistant_id)
 
-        while True:
-            user_message = input("You: ")
-            if user_message == "exit":
-                break
-            assistant_response, _, _ = self.handle_message(
-                user_message, thread_id, assistant_id, new_run.id
-            )
-            print(f"Assistant: {assistant_response}")
-            del assistant_response
-        pass
+            while True:
+                user_message = input("You: ")
+                if user_message == "exit":
+                    break
+                assistant_response, _, _ = self.handle_message(
+                    user_message, thread_id, assistant_id, new_run.id
+                )
+                print(f"Assistant: {assistant_response}")
+        except Exception as e:
+            raise ValueError(f"Error chatting with assistant: {e}")
 
     def handle_message(self, message, thread_id, assistant_id, run_id=None):
         """
@@ -174,19 +175,33 @@ class OpenaiWrapper:
         :param assistant_id: str -> The assistant_id to be used
         """
 
+        _messages = self.client.beta.threads.messages.create(
+            thread_id=thread_id, role="user", content=message
+        )
+
+        print("Run id : ", run_id)
         # NOTE: can handle this anyhow you want :- in memory, db, etc
 
         if run_id is None:
+            print("Run ID is required")
             return ValueError("Run ID is required")
-            # run = self.create_run(thread_id, assistant_id)
-            # run_id = run.id
-        else:
-            run = self.retrieve_run(thread_id, run_id)
+        #
+        # run = self.create_run(thread_id, assistant_id)
+        # run = self.retrieve_run(thread_id, run_id)
 
-        while run.status == "in_progress" or run.status == "queued":
+        run = self.client.beta.threads.runs.create(
+            thread_id=thread_id, assistant_id=assistant_id
+        )
+
+        run = self.client.beta.threads.runs.retrieve(thread_id=thread_id, run_id=run.id)
+
+        time.sleep(0.5)
+        print(f"STATUS : {run.status} ✅")
+
+        while run.status in ["in_progress", "queued"]:
             print("Waiting for response...")
             # TODO: make users set their own time
-            time.sleep(0.5)
+            time.sleep(5)
             run = self.retrieve_run(thread_id, run_id)
 
         # the response just provided by the bot
@@ -204,10 +219,7 @@ class OpenaiWrapper:
         """
 
         if "data" in response and response["data"]:
-            latest_message = response["data"][
-                -1
-            ]  # Assuming the latest message is the last item in the list
-
+            latest_message = response["data"][-1]
             assistant_message = (
                 latest_message["content"][0]["text"]["value"]
                 if latest_message["content"]
@@ -226,12 +238,17 @@ client = OpenaiWrapper(os.getenv("KEY"))
 print(client.validate_api_key())
 
 
-assistant = client.create_assistant("Testerr", "Just a random", "gpt-3.5-turbo")
-print(assistant.id)
+# assistant = client.create_assistant("Testerr", "Just a random", "gpt-3.5-turbo")
+# print(assistant.id)
 
-thread = client.create_thread(assistant.id)
+# thread = client.create_thread(assistant.id)
+# print(thread.id)
 
-client.chat(input_type="console", thread_id=thread.id, assistant_id=assistant.id)
+client.chat(
+    input_type="console",
+    thread_id="thread_Wj0bl4180TUbdGXZC8vPkpFk",
+    assistant_id="asst_LrftItf8EYHpwKQlVsgWih2g",
+)
 
 
 #
