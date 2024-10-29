@@ -249,9 +249,3 @@ client.chat(
     thread_id="thread_Wj0bl4180TUbdGXZC8vPkpFk",
     assistant_id="asst_LrftItf8EYHpwKQlVsgWih2g",
 )
-
-
-#
-# #
-# # print(client.get_latest_messages("thread_DMrqTY8eLuHxh97T60jgy3GR"))
-# client.chat(thread_id=None, assistant_id="ass_234")
