@@ -217,12 +217,15 @@ class OpenaiWrapper:
 
         return parsed_response
 
-    def interactive_chat(self, thread_id, assistant_id, message):
+    def interactive_chat(self, thread_id, assistant_id, message=None):
         """
         This method is used to chat with the assistant interactively
         passing message back and forth from & to the assistant
         """
         try:
+            if message is None:
+                raise ValueError("Message provided should not be empty")
+
             thread = self.validate_thread(thread_id)
 
             if thread is None:

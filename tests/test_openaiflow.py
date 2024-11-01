@@ -54,3 +54,9 @@ class TestOpenAIFlow(unittest.TestCase):
     def test_validate_assistant_with_invalid_data(self):
         result = self.wrapper.validate_assistant("fake_assistant")
         self.assertIsNone(result)
+
+    def test_interactive_chat_with_empty_message(self):
+        with self.assertRaises(ValueError):
+            self.wrapper.interactive_chat(
+                "thread_Wj0bl4180TUbdGXZC8vPkpFk", "asst_LrftItf8EYHpwKQlVsgWih2g", None
+            )
