@@ -1,4 +1,7 @@
 .env
+.pypirc
 __pycache__/
 .pytest_cache/
 openaiflow.egg-info/
+*.tar.gz
+*.whl

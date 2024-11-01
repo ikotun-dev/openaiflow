@@ -3,17 +3,17 @@ from setuptools import setup, find_packages
 
 setup(
     name="openaiflow",
-    version="0.1.2-alpha",  # Pre-release version
+    version="0.1.3-alpha",
     description="A Python wrapper for OpenAI API interactions.",
     long_description=open("README.md").read(),
     long_description_content_type="text/markdown",
     author="Ikotun Collins",
     author_email="",
-    url="https://github.com/ikotun-dev/openaiflow",  # GitHub repository URL
+    url="https://github.com/ikotun-dev/openaiflow",
     packages=find_packages(),
     install_requires=[
-        "annotated-types",  # Allow patch versions
-        "anyio",  # Allow any compatible version up to the next major release
+        "annotated-types",
+        "anyio",
         "certifi",
         "charset-normalizer",
         "distro",

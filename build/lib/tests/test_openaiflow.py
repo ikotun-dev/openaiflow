@@ -1,6 +1,6 @@
 import unittest
 from unittest.mock import MagicMock
-from openaiflow import api
+from openaiflow import openaiflow
 import os
 import dotenv
 
@@ -11,7 +11,7 @@ class TestOpenAIFlow(unittest.TestCase):
     def setUp(self):
         """This method is called before each test"""
         api_key = os.getenv("OPENAI_API_KEY")
-        self.wrapper = api.OpenaiWrapper(api_key)
+        self.wrapper = openaiflow.OpenaiWrapper(api_key)
 
         assert self.wrapper._api_key == api_key
         assert self.wrapper.headers["Authorization"] == f"Bearer {api_key}"
@@ -20,7 +20,7 @@ class TestOpenAIFlow(unittest.TestCase):
 
     def test_validate_api_key(self):
         with self.assertRaises(ValueError):
-            invalid_client = api.OpenaiWrapper("")
+            invalid_client = openaiflow.OpenaiWrapper("")
             invalid_client.validate_api_key()
 
     def test_create_assistant_success(self):
@@ -38,7 +38,7 @@ class TestOpenAIFlow(unittest.TestCase):
 
     def test_creating_thread_with_empty_data(self):
         with self.assertRaises(ValueError):
-            invalid_client = api.OpenaiWrapper("")
+            invalid_client = openaiflow.OpenaiWrapper("")
             invalid_client.create_thread("")
 
     def test_validate_thread_with_invalid_data(self):
@@ -47,7 +47,7 @@ class TestOpenAIFlow(unittest.TestCase):
 
     def test_create_assistant_missing_total_data(self):
         with self.assertRaises(ValueError):
-            invalid_client = api.OpenaiWrapper("")
+            invalid_client = openaiflow.OpenaiWrapper("")
             invalid_client.create_assistant("", "", "")
 
     def test_validate_assistant_with_invalid_data(self):
