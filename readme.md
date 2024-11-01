@@ -56,6 +56,8 @@ else:
 
 #### 4. Creating an Assistant
 
+An _assistant_ is a configured AI persona, defined by its name, instructions (like tone and purpose), and model (e.g., `gpt-3.5-turbo`). Different assistants can be tailored for specific tasks like support, creativity, or information.
+
 You can create a custom assistant by providing a name, instructions, and model type:
 
 ```python
@@ -68,7 +70,9 @@ model="gpt-3.5-turbo"
 
 #### 5. Starting a New Thread
 
-> A thread is used to initiate a conversation with the assistant:
+A thread is a session-based conversation with an assistant, maintaining context across messages in that session. Multiple threads can be created with the same assistant, each handling different topics or interactions independently.
+
+A thread is used to initiate a conversation with the assistant:
 
 ```python
 thread = client.create_thread(assistant_id="your_assistant_id")
