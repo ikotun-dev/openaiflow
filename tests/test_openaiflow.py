@@ -1,4 +1,5 @@
 import unittest
+import openai
 from unittest.mock import MagicMock
 from openaiflow import api
 import os
@@ -18,14 +19,14 @@ class TestOpenAIFlow(unittest.TestCase):
         assert self.wrapper.headers["Content-Type"] == "application/json"
         assert self.wrapper.headers["OpenAI-Beta"] == "assistants=v2"
 
-        self.wrapper.client = MagicMock()
-
     def test_validate_api_key(self):
         with self.assertRaises(ValueError):
             invalid_client = api.OpenaiWrapper("")
             invalid_client.validate_api_key()
 
     def test_create_assistant_success(self):
+        self.wrapper.client = MagicMock()
+
         self.wrapper.client.beta.assistants.create.return_value = {
             "id": "test_assissant_id"
         }
@@ -36,12 +37,20 @@ class TestOpenAIFlow(unittest.TestCase):
         assistant = self.wrapper.client.create_assistant(name, instructions, model)
         self.assertIsNotNone(assistant)
 
-    def test_creating_thread_with_invalid_data(self):
+    def test_creating_thread_with_empty_data(self):
         with self.assertRaises(ValueError):
             invalid_client = api.OpenaiWrapper("")
             invalid_client.create_thread("")
+
+    def test_validate_thread_with_invalid_data(self):
+        result = self.wrapper.validate_thread("fake_thread")
+        self.assertIsNone(result)
 
     def test_create_assistant_missing_total_data(self):
         with self.assertRaises(ValueError):
             invalid_client = api.OpenaiWrapper("")
             invalid_client.create_assistant("", "", "")
+
+    def test_validate_assistant_with_invalid_data(self):
+        result = self.wrapper.validate_assistant("fake_assistant")
+        self.assertIsNone(result)

@@ -1,21 +1,24 @@
 import os
 import time
-import requests
+
 import dotenv
-import file_parser
 import openai
+import requests
 from openai import OpenAI
 
-# import time
+from . import file_parser
+
 dotenv.load_dotenv()
 
 # TODO: Add a method to check the validity of the api
 # TODO: store messages ( in memory ) for a thread
+# TODO: make sleep time an adjustable parameter
+# TODO: make model an adjustable parameter
 
 
 class OpenaiWrapper:
     def __init__(self, api_key):
-        self._api_key = api_key  # set to protected
+        self._api_key = api_key
         self.client = OpenAI(api_key=self._api_key)
 
         self.headers = {
@@ -40,8 +43,11 @@ class OpenaiWrapper:
 
             # print(_.choices[0])
             return True
+        except openai.AuthenticationError:
+            raise ValueError("API key is invalid")
+
         except Exception as e:
-            raise ValueError(f"API key is invalid : {e}")
+            raise ValueError(f"An error occured : {e}")
 
     def create_assistant(self, name, instructions, model):
         try:
@@ -187,12 +193,8 @@ class OpenaiWrapper:
             thread_id=thread_id, role="user", content=message
         )
 
-        print("Run id : ", run_id)
         # NOTE: can handle this anyhow you want :- in memory, db, etc
 
-        # if run_id is None:
-        #     print("Run ID is required")
-        #     return ValueError("Run ID is required")
         run = self.client.beta.threads.runs.create(
             thread_id=thread_id, assistant_id=assistant_id
         )
@@ -271,33 +273,33 @@ class OpenaiWrapper:
             return "No messages found", None, None
 
 
-client = OpenaiWrapper(os.getenv("KEY"))
-
-reply = client.interactive_chat(
-    thread_id="thread_Wj0bl4180TUbdGXZC8vPkpFk",
-    assistant_id="asst_LrftItf8EYHpwKQlVsgWih2g",
-    message="Wagwan",
-)
-
-print(reply)
-reply = client.interactive_chat(
-    thread_id="thread_Wj0bl4180TUbdGXZC8vPkpFk",
-    assistant_id="asst_LrftItf8EYHpwKQlVsgWih2g",
-    message="tell me who you are and what you can do for me? ",
-)
-
-print(reply)
-
-
-# assistant = client.create_assistant("Testerr", "Just a random", "gpt-3.5-turbo")
-# print(assistant.id)
-
-# thread = client.create_thread(assistant.id)
-# print(thread.id)
-
-# print(client.validate_thread("djkdjkdjkdjkdjk"))
-client.chat(
-    input_type="console",
-    thread_id="thread_Wj0bl4180TUbdGXZC8vPkpFk",
-    assistant_id="asst_LrftItf8EYHpwKQlVsgWih2g",
-)
+# client = OpenaiWrapper(os.getenv("KEY"))
+#
+# reply = client.interactive_chat(
+#     thread_id="thread_Wj0bl4180TUbdGXZC8vPkpFk",
+#     assistant_id="asst_LrftItf8EYHpwKQlVsgWih2g",
+#     message="Wagwan",
+# )
+#
+# print(reply)
+# reply = client.interactive_chat(
+#     thread_id="thread_Wj0bl4180TUbdGXZC8vPkpFk",
+#     assistant_id="asst_LrftItf8EYHpwKQlVsgWih2g",
+#     message="tell me who you are and what you can do for me? ",
+# )
+#
+# print(reply)
+#
+#
+# # assistant = client.create_assistant("Testerr", "Just a random", "gpt-3.5-turbo")
+# # print(assistant.id)
+#
+# # thread = client.create_thread(assistant.id)
+# # print(thread.id)
+#
+# # print(client.validate_thread("djkdjkdjkdjkdjk"))
+# client.chat(
+#     input_type="console",
+#     thread_id="thread_Wj0bl4180TUbdGXZC8vPkpFk",
+#     assistant_id="asst_LrftItf8EYHpwKQlVsgWih2g",
+# )
