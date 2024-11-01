@@ -1,19 +1,25 @@
 OpenAIFlow
+<br/>
 OpenAIFlow is a Python library designed to simplify interactions with the OpenAI API, allowing you to create and manage assistants, threads, and messaging workflows effortlessly.
 
 Features
-Validate and manage OpenAI API keys
-Create and manage custom assistants
-Start new threads for conversations with assistants
-Chat in different formats (console, interactive)
-Retrieve and parse the latest assistant responses
-Installation
+
+- Validate and manage OpenAI API keys
+- Create and manage custom assistants
+- Start new threads for conversations with assistants
+- Chat in different formats (console, interactive)
+- Retrieve and parse the latest assistant responses
+- Installation
+
 To install the library, run:
 
-bash
-Copy code
+bash```
 pip install openaiflow
-Getting Started
+
+```
+
+
+### Getting Started
 Setup
 Set up your OpenAI API key:
 
@@ -118,3 +124,4 @@ Add adjustable sleep intervals for response polling
 Store messages in memory for easy retrieval and context switching
 License
 This project is licensed under the MIT License.
+```
