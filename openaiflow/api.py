@@ -62,6 +62,10 @@ class OpenaiWrapper:
         try:
             assistant = self.client.beta.assistants.retrieve(assistant_id)
             return assistant
+
+        except openai.NotFoundError:
+            return None
+
         except Exception as e:
             raise ValueError(f"Error validating assistant: {e}")
 
@@ -186,13 +190,14 @@ class OpenaiWrapper:
         print("Run id : ", run_id)
         # NOTE: can handle this anyhow you want :- in memory, db, etc
 
-        if run_id is None:
-            print("Run ID is required")
-            return ValueError("Run ID is required")
+        # if run_id is None:
+        #     print("Run ID is required")
+        #     return ValueError("Run ID is required")
         run = self.client.beta.threads.runs.create(
             thread_id=thread_id, assistant_id=assistant_id
         )
 
+        print("Run ID : ", run.id)
         run = self.client.beta.threads.runs.retrieve(thread_id=thread_id, run_id=run.id)
 
         time.sleep(0.5)
@@ -202,7 +207,7 @@ class OpenaiWrapper:
             print("Waiting for response...")
             # TODO: make users set their own time
             time.sleep(5)
-            run = self.retrieve_run(thread_id, run_id)
+            run = self.retrieve_run(thread_id, run.id)
 
         # the response just provided by the bot
         previous_message = self.get_latest_messages(thread_id)
@@ -215,15 +220,32 @@ class OpenaiWrapper:
         This method is used to chat with the assistant interactively
         passing message back and forth from & to the assistant
         """
-        # check if theres a thread
-        thread = self.validate_thread(thread_id)
-        if thread is None:
-            thread = self.create_thread(assistant_id)
-            print("Thread created successfully")
-        else:
-            print("Thread retrevied successfully.")
+        try:
+            thread = self.validate_thread(thread_id)
 
-        pass
+            if thread is None:
+                thread = self.create_thread(assistant_id)
+                print("Thread created successfully")
+            else:
+                print("Thread retrevied successfully.")
+
+            # new_run = self.create_run(thread_id, assistant_id)
+
+            assistant = self.validate_assistant(assistant_id)
+            if assistant is None:
+                print("Assistant not found")
+                return
+
+            assistant_response = self.handle_message(
+                message,
+                thread_id,
+                assistant_id,
+            )
+            return assistant_response
+
+            pass
+        except openai.AuthenticationError as e:
+            raise ValueError(f"Error authenticating: {e}")
 
     def parse_assistant_response(self, response):
         """
@@ -251,11 +273,20 @@ class OpenaiWrapper:
 
 client = OpenaiWrapper(os.getenv("KEY"))
 
-client.interactive_chat(
-    thread_id="thread_Wj0bl4180TUbdGXZC8vPkpFki",
+reply = client.interactive_chat(
+    thread_id="thread_Wj0bl4180TUbdGXZC8vPkpFk",
     assistant_id="asst_LrftItf8EYHpwKQlVsgWih2g",
     message="Wagwan",
 )
+
+print(reply)
+reply = client.interactive_chat(
+    thread_id="thread_Wj0bl4180TUbdGXZC8vPkpFk",
+    assistant_id="asst_LrftItf8EYHpwKQlVsgWih2g",
+    message="tell me who you are and what you can do for me? ",
+)
+
+print(reply)
 
 
 # assistant = client.create_assistant("Testerr", "Just a random", "gpt-3.5-turbo")
@@ -265,8 +296,8 @@ client.interactive_chat(
 # print(thread.id)
 
 # print(client.validate_thread("djkdjkdjkdjkdjk"))
-# client.chat(
-#     input_type="console",
-#     thread_id="thread_Wj0bl4180TUbdGXZC8vPkpFk",
-#     assistant_id="asst_LrftItf8EYHpwKQlVsgWih2g",
-# )
+client.chat(
+    input_type="console",
+    thread_id="thread_Wj0bl4180TUbdGXZC8vPkpFk",
+    assistant_id="asst_LrftItf8EYHpwKQlVsgWih2g",
+)
