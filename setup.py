@@ -3,12 +3,12 @@ from setuptools import setup, find_packages
 
 setup(
     name="openaiflow",
-    version="0.1.3-alpha",
+    version="0.1.4-alpha",
     description="A Python wrapper for OpenAI API interactions.",
     long_description=open("README.md").read(),
     long_description_content_type="text/markdown",
     author="Ikotun Collins",
-    author_email="",
+    author_email="danlogan2003@gmail.com",
     url="https://github.com/ikotun-dev/openaiflow",
     packages=find_packages(),
     install_requires=[
