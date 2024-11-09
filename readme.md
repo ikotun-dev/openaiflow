@@ -40,7 +40,7 @@ import os
 
 # Load API key from environment
 api_key = os.getenv("KEY")
-client = OpenAIWrapper(api_key)
+client = openaiflow.OpenAIWrapper(api_key)
 ```
 
 #### 3. Validating Your API Key
