@@ -265,3 +265,9 @@ class OpenaiWrapper:
             return assistant_message, thread_id, run_id
         else:
             return "No messages found", None, None
+
+    def handle_image(self, image_path):
+        """
+        This method is used to handle images
+        """
+        pass
